@@ -40,7 +40,15 @@ void RoutePlanner::AddNeighbors(RouteModel::Node *current_node) {
     // do everything mentioned in "Tips" above
     current_node->FindNeighbors();
     for (RouteModel::Node *neighbor : current_node->neighbors) {
-        if (!neighbor->visited) {
+        if (neighbor->visited) {
+            // update neighbor's parent and g value if current g value is better
+            float current_g_value = current_node->g_value + current_node->distance(*neighbor);
+            if (current_g_value < neighbor->g_value) {
+                neighbor->parent = current_node;
+                neighbor->g_value = current_g_value;
+            }
+        } else {  // !(neighbor->visited)
+            // neighbor has never been visited, initialize its values accordingly
             neighbor->parent = current_node;
             neighbor->h_value = CalculateHValue(neighbor);
             neighbor->g_value = current_node->g_value + current_node->distance(*neighbor);
